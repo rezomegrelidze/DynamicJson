@@ -1,4 +1,3 @@
-
 using System.Collections;
 using System.Dynamic;
 using System.Reflection;
@@ -7,7 +6,32 @@ using System.Text.Json;
 
 public class DynamicJson
 {
-    static dynamic ReadArray(Utf8JsonReader reader)
+    public static dynamic Deserialize(string text)
+    {
+        var data = Encoding.UTF8.GetBytes(text);
+
+        var reader = new Utf8JsonReader(data);
+
+        reader.Read();
+        return reader.TokenType == JsonTokenType.StartArray ? Deserializer.ReadArray(reader) : Deserializer.ReadObject(reader);
+    }
+
+    public static string Serialize(object obj)
+    {
+       using MemoryStream ms = new MemoryStream();
+        var writer = new Utf8JsonWriter(ms);
+
+        Serializer.SerializeObject(writer, obj);
+        writer.Flush();
+        var data = ms.ToArray();
+        var json = Encoding.UTF8.GetString(data);
+
+       return json;
+    }
+}
+
+internal static class Deserializer{
+    public static dynamic ReadArray(Utf8JsonReader reader)
     {
         var array = new List<dynamic?>();
         while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
@@ -57,7 +81,7 @@ public class DynamicJson
             dict[propertyName] = ReadObject(reader);
     }
 
-    static dynamic ReadObject(Utf8JsonReader reader)
+    public static dynamic ReadObject(Utf8JsonReader reader)
     {
         var expandoObject = new ExpandoObject();
         var dict = expandoObject as IDictionary<string, object>;
@@ -69,31 +93,10 @@ public class DynamicJson
 
         return expandoObject;
     }
+}
 
-    public static dynamic Deserialize(string text)
-    {
-        var data = Encoding.UTF8.GetBytes(text);
-
-        var reader = new Utf8JsonReader(data);
-
-        reader.Read();
-        return reader.TokenType == JsonTokenType.StartArray ? ReadArray(reader) : ReadObject(reader);
-    }
-
-    public static string Serialize(object obj)
-    {
-        using MemoryStream ms = new MemoryStream();
-        var writer = new Utf8JsonWriter(ms);
-
-        SerializeObject(writer, obj);
-        writer.Flush();
-        var data = ms.ToArray();
-        var json = Encoding.UTF8.GetString(data);
-
-        return json;
-    }
-
-    private static void SerializeObject(Utf8JsonWriter writer, object obj)
+internal static class Serializer{
+    public static void SerializeObject(Utf8JsonWriter writer, object obj)
     {
         if (obj is IList arr)
         {

@@ -1,6 +1,7 @@
 # DynamicJson
 Dynamic Json Serializer/Deserialized
 
+supports also strongly typed serialization.
 
 based on Microsofts **Utf8JsonReader** and **Utf8JsonWriter**.
 

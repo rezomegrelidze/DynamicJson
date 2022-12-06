@@ -4,8 +4,8 @@ using System.Reflection;
 using System.Text.Json;
 using System.Numerics;
 
-internal static class Deserializer{
-
+internal static class Deserializer
+{
     public static dynamic ReadArray(Utf8JsonReader reader)
     {
         var array = new List<dynamic?>();
@@ -71,93 +71,26 @@ internal static class Deserializer{
 
     internal static T Deserialize<T>(Utf8JsonReader reader)
     {
-        try{
-
+        try
+        {
             var type = typeof(T);
-            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-
-            if(type.IsAssignableTo(typeof(IList)) && reader.TokenType == JsonTokenType.StartArray){
+            if (type.IsAssignableTo(typeof(IList)) && reader.TokenType == JsonTokenType.StartArray)
+            {
                 return ReadArray<T>(reader);
-            }else {
-                return ReadObject<T>(reader);
             }
 
-        }catch{
+            return ReadObject<T>(reader);
+
+        }
+        catch
+        {
             throw new JsonException($"Failed to deserialize type {typeof(T)}");
         }
     }
 
     private static T ReadObject<T>(Utf8JsonReader reader)
     {
-        return (T)ReadObject(reader,typeof(T));
-    }
-
-    private static void ReadProperty<T>(Utf8JsonReader reader, T instance)
-    {
-        var properties = instance.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
-
-        var propertyName = reader.GetString();
-
-        var property = properties.FirstOrDefault(x => x.Name == propertyName);
-
-        if(property == null)
-            throw new JsonException($"Type {typeof(T)} doesn't contain property with name {propertyName}");
-
-        reader.Read();
-
-        if (reader.TokenType == JsonTokenType.True && property.PropertyType == typeof(bool))
-        {
-            property.SetValue(instance,true);
-        }
-        else if (reader.TokenType == JsonTokenType.False && property.PropertyType == typeof(bool))
-        {
-            property.SetValue(instance,false);
-        }
-        else if (reader.TokenType == JsonTokenType.Null && property.PropertyType.IsClass)
-        {
-            
-            property.SetValue(instance,null);
-        }
-        else if (reader.TokenType == JsonTokenType.Number && property.PropertyType.IsValueType)
-        {
-            var numberType = typeof(INumber<>).MakeGenericType(property.PropertyType);
-            if(property.PropertyType.IsAssignableTo(numberType))
-            {
-                dynamic value = null;
-                if(property.PropertyType == typeof(int))
-                    value = reader.GetInt32();
-                if(property.PropertyType == typeof(decimal))
-                    value = reader.GetDecimal();
-                if(property.PropertyType == typeof(byte))
-                    value = reader.GetInt32();
-                if(property.PropertyType == typeof(double))
-                    value = reader.GetDouble();
-                if(property.PropertyType == typeof(float))
-                    value = reader.GetSingle();
-                if(property.PropertyType == typeof(byte))
-                    value = reader.GetByte();
-                if(property.PropertyType == typeof(long))
-                    value = reader.GetInt64();
-                if(property.PropertyType == typeof(uint))
-                    value = reader.GetUInt32();
-                if(property.PropertyType == typeof(ulong))
-                    value = reader.GetUInt64();
-                if(property.PropertyType == typeof(uint))
-                    value = reader.GetUInt32();
-                if(property.PropertyType == typeof(short))
-                    value = reader.GetInt16();
-                if(property.PropertyType == typeof(ushort))
-                    value = reader.GetUInt16();
-
-                property.SetValue(instance,value);
-            }
-        }
-        else if (reader.TokenType == JsonTokenType.String && property.PropertyType == typeof(string))
-            property.SetValue(instance,reader.GetString());
-        else if (reader.TokenType == JsonTokenType.StartArray && property.PropertyType.IsAssignableTo(typeof(IList)))
-            property.SetValue(instance,ReadArray(reader,property.PropertyType));
-        else if (reader.TokenType == JsonTokenType.StartObject)
-            property.SetValue(instance,ReadObject(reader,property.PropertyType));
+        return (T) ReadObject(reader, typeof(T));
     }
 
     private static object? ReadObject(Utf8JsonReader reader, Type type)
@@ -166,7 +99,7 @@ internal static class Deserializer{
         while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
         {
             if (reader.TokenType == JsonTokenType.PropertyName)
-                ReadProperty(reader,instance);
+                ReadProperty(reader, instance);
         }
 
         return instance;
@@ -179,78 +112,79 @@ internal static class Deserializer{
 
         var propertyName = reader.GetString();
 
-        var property = properties.FirstOrDefault(x => x.Name == propertyName);
+        var property =
+            properties.FirstOrDefault(x => string.Equals(x.Name, propertyName, StringComparison.OrdinalIgnoreCase));
 
-        if(property == null)
+        if (property == null)
             throw new JsonException($"Type {type} doesn't contain property with name {propertyName}");
 
         reader.Read();
 
         if (reader.TokenType == JsonTokenType.True && property.PropertyType == typeof(bool))
         {
-            property.SetValue(instance,true);
+            property.SetValue(instance, true);
         }
         else if (reader.TokenType == JsonTokenType.False && property.PropertyType == typeof(bool))
         {
-            property.SetValue(instance,false);
+            property.SetValue(instance, false);
         }
         else if (reader.TokenType == JsonTokenType.Null && property.PropertyType.IsClass)
         {
-            
-            property.SetValue(instance,null);
+
+            property.SetValue(instance, null);
         }
         else if (reader.TokenType == JsonTokenType.Number && property.PropertyType.IsValueType)
         {
             var numberType = typeof(INumber<>).MakeGenericType(property.PropertyType);
-            if(property.PropertyType.IsAssignableTo(numberType))
+            if (property.PropertyType.IsAssignableTo(numberType))
             {
                 dynamic value = null;
-                if(property.PropertyType == typeof(int))
+                if (property.PropertyType == typeof(int))
                     value = reader.GetInt32();
-                if(property.PropertyType == typeof(decimal))
+                else if (property.PropertyType == typeof(decimal))
                     value = reader.GetDecimal();
-                if(property.PropertyType == typeof(byte))
+                else if (property.PropertyType == typeof(byte))
                     value = reader.GetInt32();
-                if(property.PropertyType == typeof(double))
+                else if (property.PropertyType == typeof(double))
                     value = reader.GetDouble();
-                if(property.PropertyType == typeof(float))
+                else if (property.PropertyType == typeof(float))
                     value = reader.GetSingle();
-                if(property.PropertyType == typeof(byte))
+                else if (property.PropertyType == typeof(byte))
                     value = reader.GetByte();
-                if(property.PropertyType == typeof(long))
+                else if (property.PropertyType == typeof(long))
                     value = reader.GetInt64();
-                if(property.PropertyType == typeof(uint))
+                else if (property.PropertyType == typeof(uint))
                     value = reader.GetUInt32();
-                if(property.PropertyType == typeof(ulong))
+                else if (property.PropertyType == typeof(ulong))
                     value = reader.GetUInt64();
-                if(property.PropertyType == typeof(uint))
+                else if (property.PropertyType == typeof(uint))
                     value = reader.GetUInt32();
-                if(property.PropertyType == typeof(short))
+                else if (property.PropertyType == typeof(short))
                     value = reader.GetInt16();
-                if(property.PropertyType == typeof(ushort))
+                else if (property.PropertyType == typeof(ushort))
                     value = reader.GetUInt16();
 
-                property.SetValue(instance,value);
+                property.SetValue(instance, value);
             }
         }
         else if (reader.TokenType == JsonTokenType.String && property.PropertyType == typeof(string))
-            property.SetValue(instance,reader.GetString());
+            property.SetValue(instance, reader.GetString());
         else if (reader.TokenType == JsonTokenType.StartArray && property.PropertyType.IsAssignableTo(typeof(IList)))
-            property.SetValue(instance,ReadArray(reader,property.PropertyType));
+            property.SetValue(instance, ReadArray(reader, property.PropertyType));
         else if (reader.TokenType == JsonTokenType.StartObject)
-            property.SetValue(instance,ReadObject(reader,property.PropertyType));
+            property.SetValue(instance, ReadObject(reader, property.PropertyType));
     }
 
     private static object? ReadArray(Utf8JsonReader reader, Type type)
     {
         var instance = Activator.CreateInstance(type);
-        IList array = instance as IList;
-        while(reader.Read() && reader.TokenType != JsonTokenType.EndArray)
+        IList array = (instance as IList)!;
+        while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
         {
             if (reader.TokenType == JsonTokenType.StartArray)
-                array.Add(ReadArray(reader,type));
+                array.Add(ReadArray(reader, type));
             else if (reader.TokenType == JsonTokenType.StartObject)
-                array.Add(ReadObject(reader,type));
+                array.Add(ReadObject(reader, type));
             else if (reader.TokenType == JsonTokenType.String)
                 array.Add(ReadString(reader));
             else if (reader.TokenType == JsonTokenType.False)
@@ -268,6 +202,6 @@ internal static class Deserializer{
 
     private static T ReadArray<T>(Utf8JsonReader reader)
     {
-        return (T)ReadArray(reader,typeof(T));
+        return (T) ReadArray(reader, typeof(T));
     }
 }

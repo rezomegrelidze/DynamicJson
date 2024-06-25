@@ -82,9 +82,9 @@ internal static class Deserializer
             return ReadObject<T>(reader);
 
         }
-        catch
+        catch(Exception ex)
         {
-            throw new JsonException($"Failed to deserialize type {typeof(T)}");
+            throw new JsonException($"Failed to deserialize type {typeof(T)}",ex);
         }
     }
 
@@ -192,7 +192,42 @@ internal static class Deserializer
             else if (reader.TokenType == JsonTokenType.True)
                 array.Add(true);
             else if (reader.TokenType == JsonTokenType.Number)
-                array.Add(reader.GetDouble());
+            {
+                if (type.IsGenericType)
+                {
+                    var numberType = type.GetGenericArguments()[0];
+
+                    if (numberType == typeof(int))
+                        array.Add(reader.GetInt32());
+                    else if (numberType == typeof(decimal))
+                        array.Add(reader.GetDecimal());
+                    else if (numberType == typeof(byte))
+                        array.Add(reader.GetInt32());
+                    else if (numberType == typeof(double))
+                        array.Add(reader.GetDouble());
+                    else if (numberType == typeof(float))
+                        array.Add(reader.GetSingle());
+                    else if (numberType == typeof(byte))
+                        array.Add(reader.GetByte());
+                    else if (numberType == typeof(long))
+                        array.Add(reader.GetInt64());
+                    else if (numberType == typeof(uint))
+                        array.Add(reader.GetUInt32());
+                    else if (numberType == typeof(ulong))
+                        array.Add(reader.GetUInt64());
+                    else if (numberType == typeof(uint))
+                        array.Add(reader.GetUInt32());
+                    else if (numberType == typeof(short))
+                        array.Add(reader.GetInt16());
+                    else if (numberType == typeof(ushort))
+                        array.Add(reader.GetUInt16());
+                    else throw new Exception($"Unexpected number type! {numberType}");
+                }
+                else
+                {
+                    array.Add(reader.GetDouble());
+                }
+            }
             else if (reader.TokenType == JsonTokenType.Null)
                 array.Add(null);
         }

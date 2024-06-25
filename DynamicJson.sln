@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynamicJson", "DynamicJson.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTests", "..\ConsoleTests\ConsoleTests.csproj", "{6C7EF33B-7381-41AA-B1E1-E9F1ED665EA3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicJson.Tests", "..\DynamicJson.Tests\DynamicJson.Tests.csproj", "{8F7EA06C-B6F8-42B9-A6C7-D8AF6D80277A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{6C7EF33B-7381-41AA-B1E1-E9F1ED665EA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C7EF33B-7381-41AA-B1E1-E9F1ED665EA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C7EF33B-7381-41AA-B1E1-E9F1ED665EA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F7EA06C-B6F8-42B9-A6C7-D8AF6D80277A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F7EA06C-B6F8-42B9-A6C7-D8AF6D80277A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F7EA06C-B6F8-42B9-A6C7-D8AF6D80277A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F7EA06C-B6F8-42B9-A6C7-D8AF6D80277A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

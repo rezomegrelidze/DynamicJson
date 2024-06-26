@@ -116,7 +116,12 @@ internal static class Deserializer
             properties.FirstOrDefault(x => string.Equals(x.Name, propertyName, StringComparison.OrdinalIgnoreCase));
 
         if (property == null)
-            throw new JsonException($"Type {type} doesn't contain property with name {propertyName}");
+        {
+            // type doesn't contain property with given propertyName so read it and ignore it
+
+            reader.Read();
+            return;
+        }
 
         reader.Read();
 

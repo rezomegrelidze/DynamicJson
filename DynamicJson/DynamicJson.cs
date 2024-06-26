@@ -5,12 +5,19 @@ public class DynamicJson
 {
     public static dynamic Deserialize(string text)
     {
-        var data = Encoding.UTF8.GetBytes(text);
+        try
+        {
+            var data = Encoding.UTF8.GetBytes(text);
 
-        var reader = new Utf8JsonReader(data);
+            var reader = new Utf8JsonReader(data);
 
-        reader.Read();
-        return reader.TokenType == JsonTokenType.StartArray ? Deserializer.ReadArray(ref reader) : Deserializer.ReadObject(ref reader);
+            reader.Read();
+            return reader.TokenType == JsonTokenType.StartArray ? Deserializer.ReadArray(ref reader) : Deserializer.ReadObject(ref reader);
+        }
+        catch (Exception ex)
+        {
+            throw new JsonException($"Invalid json encountered - Message: {ex.Message}", ex);
+        }
     }
 
     public static T Deserialize<T>(string text)

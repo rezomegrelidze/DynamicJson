@@ -6,17 +6,17 @@ using System.Numerics;
 
 internal static class Deserializer
 {
-    public static dynamic ReadArray(Utf8JsonReader reader)
+    public static dynamic ReadArray(ref Utf8JsonReader reader)
     {
         var array = new List<dynamic?>();
         while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
         {
             if (reader.TokenType == JsonTokenType.StartArray)
-                array.Add(ReadArray(reader));
+                array.Add(ReadArray(ref reader));
             else if (reader.TokenType == JsonTokenType.StartObject)
-                array.Add(ReadObject(reader));
+                array.Add(ReadObject(ref reader));
             else if (reader.TokenType == JsonTokenType.String)
-                array.Add(ReadString(reader));
+                array.Add(ReadString(ref reader));
             else if (reader.TokenType == JsonTokenType.False)
                 array.Add(false);
             else if (reader.TokenType == JsonTokenType.True)
@@ -30,12 +30,12 @@ internal static class Deserializer
         return array;
     }
 
-    static string ReadString(Utf8JsonReader reader)
+    static string ReadString(ref Utf8JsonReader reader)
     {
         return reader.GetString();
     }
 
-    static void ReadProperty(Utf8JsonReader reader, IDictionary<string, object> dict)
+    static void ReadProperty(ref Utf8JsonReader reader, IDictionary<string, object> dict)
     {
         var propertyName = reader.GetString();
         reader.Read();
@@ -51,19 +51,19 @@ internal static class Deserializer
         else if (reader.TokenType == JsonTokenType.String)
             dict[propertyName] = reader.GetString();
         else if (reader.TokenType == JsonTokenType.StartArray)
-            dict[propertyName] = ReadArray(reader);
+            dict[propertyName] = ReadArray(ref reader);
         else if (reader.TokenType == JsonTokenType.StartObject)
-            dict[propertyName] = ReadObject(reader);
+            dict[propertyName] = ReadObject(ref reader);
     }
 
-    public static dynamic ReadObject(Utf8JsonReader reader)
+    public static dynamic ReadObject(ref Utf8JsonReader reader)
     {
         var expandoObject = new ExpandoObject();
         var dict = expandoObject as IDictionary<string, object>;
         while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
         {
             if (reader.TokenType == JsonTokenType.PropertyName)
-                ReadProperty(reader, dict);
+                ReadProperty(ref reader, dict);
         }
 
         return expandoObject;
@@ -90,22 +90,22 @@ internal static class Deserializer
 
     private static T ReadObject<T>(Utf8JsonReader reader)
     {
-        return (T) ReadObject(reader, typeof(T));
+        return (T) ReadObject(ref reader, typeof(T));
     }
 
-    private static object? ReadObject(Utf8JsonReader reader, Type type)
+    private static object? ReadObject(ref Utf8JsonReader reader, Type type)
     {
         var instance = Activator.CreateInstance(type);
         while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
         {
             if (reader.TokenType == JsonTokenType.PropertyName)
-                ReadProperty(reader, instance);
+                ReadProperty(ref reader, instance);
         }
 
         return instance;
     }
 
-    private static void ReadProperty(Utf8JsonReader reader, object? instance)
+    private static void ReadProperty(ref Utf8JsonReader reader, object? instance)
     {
         var type = instance.GetType();
         var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
@@ -170,23 +170,23 @@ internal static class Deserializer
         else if (reader.TokenType == JsonTokenType.String && property.PropertyType == typeof(string))
             property.SetValue(instance, reader.GetString());
         else if (reader.TokenType == JsonTokenType.StartArray && property.PropertyType.IsAssignableTo(typeof(IList)))
-            property.SetValue(instance, ReadArray(reader, property.PropertyType));
+            property.SetValue(instance, ReadArray(ref reader, property.PropertyType));
         else if (reader.TokenType == JsonTokenType.StartObject)
-            property.SetValue(instance, ReadObject(reader, property.PropertyType));
+            property.SetValue(instance, ReadObject(ref reader, property.PropertyType));
     }
 
-    private static object? ReadArray(Utf8JsonReader reader, Type type)
+    private static object? ReadArray(ref Utf8JsonReader reader, Type type)
     {
         var instance = Activator.CreateInstance(type);
         IList array = (instance as IList)!;
         while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
         {
             if (reader.TokenType == JsonTokenType.StartArray)
-                array.Add(ReadArray(reader, type));
+                array.Add(ReadArray(ref reader, type));
             else if (reader.TokenType == JsonTokenType.StartObject)
-                array.Add(ReadObject(reader, type));
+                array.Add(ReadObject(ref reader, type));
             else if (reader.TokenType == JsonTokenType.String)
-                array.Add(ReadString(reader));
+                array.Add(ReadString(ref reader));
             else if (reader.TokenType == JsonTokenType.False)
                 array.Add(false);
             else if (reader.TokenType == JsonTokenType.True)
@@ -237,6 +237,6 @@ internal static class Deserializer
 
     private static T ReadArray<T>(Utf8JsonReader reader)
     {
-        return (T) ReadArray(reader, typeof(T));
+        return (T) ReadArray(ref reader, typeof(T));
     }
 }

@@ -10,7 +10,7 @@ public class DynamicJson
         var reader = new Utf8JsonReader(data);
 
         reader.Read();
-        return reader.TokenType == JsonTokenType.StartArray ? Deserializer.ReadArray(reader) : Deserializer.ReadObject(reader);
+        return reader.TokenType == JsonTokenType.StartArray ? Deserializer.ReadArray(ref reader) : Deserializer.ReadObject(ref reader);
     }
 
     public static T Deserialize<T>(string text)

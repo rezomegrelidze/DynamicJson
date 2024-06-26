@@ -17,5 +17,5 @@ DynamicJson.Serialize
 
 For deserialization
 `
-Dynamic.Deserialize
+DynamicJson.Deserialize
 `

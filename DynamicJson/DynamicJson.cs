@@ -1,9 +1,15 @@
 using System.Text;
 using System.Text.Json;
 
-public class DynamicJson
+public static class DynamicJson
 {
-    public static dynamic Deserialize(string text)
+    /// <summary>
+    /// Deserializes the json string to a C# dynamic object
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns></returns>
+    /// <exception cref="JsonException"></exception>
+    public static dynamic Deserialize(this string text)
     {
         try
         {
@@ -20,7 +26,13 @@ public class DynamicJson
         }
     }
 
-    public static T Deserialize<T>(string text)
+    /// <summary>
+    /// Deserializes the JSON string to the given type
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="text"></param>
+    /// <returns></returns>
+    public static T Deserialize<T>(this string text)
     {
         var data = Encoding.UTF8.GetBytes(text);
 
@@ -30,8 +42,12 @@ public class DynamicJson
         return Deserializer.Deserialize<T>(reader);
     }
 
-
-    public static string Serialize(object obj)
+    /// <summary>
+    /// Serializes the object to a JSON string
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
+    public static string Serialize(this object obj)
     {
        using MemoryStream ms = new MemoryStream();
         var writer = new Utf8JsonWriter(ms);

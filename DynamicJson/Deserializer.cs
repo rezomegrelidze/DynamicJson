@@ -184,12 +184,13 @@ internal static class Deserializer
     {
         var instance = Activator.CreateInstance(type);
         IList array = (instance as IList)!;
+        var innerType = type.IsGenericType ? type.GetGenericArguments()[0] : typeof(object);
         while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
         {
             if (reader.TokenType == JsonTokenType.StartArray)
-                array.Add(ReadArray(ref reader, type));
+                array.Add(ReadArray(ref reader, innerType));
             else if (reader.TokenType == JsonTokenType.StartObject)
-                array.Add(ReadObject(ref reader, type));
+                array.Add(ReadObject(ref reader, innerType));
             else if (reader.TokenType == JsonTokenType.String)
                 array.Add(ReadString(ref reader));
             else if (reader.TokenType == JsonTokenType.False)

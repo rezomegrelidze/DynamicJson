@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.IO;
 using Xunit;
+using Bogus;
 
 public class DynamicJsonTests
 {
@@ -126,6 +127,24 @@ public class DynamicJsonTests
 
         Assert.Equal("John", result.Name);
         Assert.Equal(0, result.Age); // default int value
+    }
+
+    [Fact]
+    public void SerializeLargeObject_Then_Deserialize()
+    {
+        var length = 100000;
+        Faker<Person> faker = new Faker<Person>()
+            .RuleFor(o => o.Name, f => f.Person.FullName)
+            .RuleFor(o => o.Age, f => f.Random.Number(1, 100));
+
+
+        var people = faker.Generate(length);
+
+        var serialized = people.Serialize();
+
+        var deserilzed = serialized.Deserialize<List<Person>>();
+
+        Assert.True(deserilzed.Count == length);
     }
 }
 

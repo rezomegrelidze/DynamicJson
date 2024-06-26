@@ -19,3 +19,5 @@ For deserialization
 `
 DynamicJson.Deserialize
 `
+
+nuget: https://www.nuget.org/packages/Rezo.DynamicJson/
